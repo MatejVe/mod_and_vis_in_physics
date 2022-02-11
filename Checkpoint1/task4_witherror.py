@@ -1,3 +1,4 @@
+from email.errors import MessageError
 from hashlib import new
 import matplotlib
 from pyparsing import col
@@ -33,7 +34,7 @@ def glauber_energy_change(spins, spinFlipLoc):
         row, col = neigbour
         neighbourSpinSum += spins[row, col]
 
-    return 2*neighbourSpinSum*oldSpin
+    return 2*neighbourSpinSum*oldSpin  # TODO: check if this is always true
 
 @jit
 def metropolis_test_true(deltaE, temp):
@@ -100,27 +101,78 @@ def glauber_ising_sim(nstep, N, kT, spin):
                 energies.append(energy)
                 energies2.append(np.power(energy, 2))
 
-    mags = np.array(mags)
-    energies = np.array(energies)
-    return np.mean(mags), np.mean(mags2), np.mean(energies), np.mean(energies2), spin
+    meanEnergy = np.mean(energies)
+    meanEnergySquared = np.mean(energies2)
+    heatCapacity = 1 / (N**2 * kT**2) * (meanEnergySquared - meanEnergy**2)
+
+    meanMag = np.mean(mags)
+    meanMagSquared = np.mean(mags2)
+    suss = 1 / (N**2 * kT) * (meanMagSquared - meanMag**2)
+
+    # Jackknife errors
+    energyError = []
+    heatCapacityError = []
+    magError = []
+    sussError = []
+
+    for i in range(len(energies)):
+        newEnergies = energies[:i] + energies[i+1:]
+        newEnergiesSquared = [energy**2 for energy in newEnergies]
+
+        newEmean = np.mean(newEnergies)
+        meanSquared = np.mean(newEnergiesSquared)
+
+        newHeat = 1 / (2500 * kT**2) * (meanSquared - newEmean**2)
+        energyError.append((newEmean - meanEnergy)**2)
+        heatCapacityError.append((heatCapacity - newHeat)**2)
+
+        newMags = mags[:i] + mags[i+1:]
+        newMagsSquared = [mag**2 for mag in newMags]
+
+        newMagMean = np.mean(newMags)
+        newMagMeanSquared = np.mean(newMagsSquared)
+
+        newSuss = 1 / (N**2 * kT) * (newMagMeanSquared - newMagMean**2)
+        magError.append((newMagMean - meanMag)**2)
+        sussError.append((newSuss - suss)**2)
+    
+    energyError = np.sqrt(np.sum(energyError))
+    heatCapacityError = np.sqrt(np.sum(heatCapacityError))
+    magError = np.sqrt(np.sum(magError))
+    sussError = np.sqrt(np.sum(sussError))
+
+    toReturn = (meanEnergy, energyError,
+                heatCapacity, heatCapacityError,
+                meanMag, magError,
+                suss, sussError,
+                spin)
+    return  toReturn
 
 temps = np.linspace(1, 3, 21)
-magAvgs = []
-magAvgs2 = []
 energyAvgs = []
-energyAvgs2 = []
+energyErrors = []
+heatCaps = []
+hCerrors = []
+magAvgs = []
+magErrors = []
+susses = []
+sussErrors = []
 
 spin = np.ones((50, 50))
 
-f = open('task4_results', 'w')
+f = open('task4_witherror_results', 'w')
 for temp in temps:
-    magAvg, magAvg2, energyAvg, energyAvg2, spin = glauber_ising_sim(11000, 50, temp, spin)
-    f.write(f'{temp} {magAvg} {magAvg2} {energyAvg} {energyAvg2}\n')
+    e, eerror, hC, hCerror, mag, magError, suss, sussError, spin = glauber_ising_sim(11000, 50, temp, spin)
+    f.write(f'{temp} {e} {eerror} {hC} {hCerror} {mag} {magError} {suss} {sussError}\n')
 
-    magAvgs.append(magAvg)
-    magAvgs2.append(magAvg2)
-    energyAvgs.append(energyAvg)
-    energyAvgs2.append(energyAvg2)
+    energyAvgs.append(e)
+    energyErrors.append(eerror)
+    heatCaps.append(hC)
+    hCerrors.append(hCerror)
+    magAvgs.append(mag)
+    magErrors.append(magError)
+    susses.append(suss)
+    sussErrors.append(sussError)
 f.close()
 
 
@@ -128,29 +180,23 @@ fig, axes = plt.subplots(2, 2, figsize=(18, 10))
 axes[0, 0].scatter(temps, magAvgs, marker='o', color='IndianRed')
 axes[0, 0].set_xlabel('Value of kT')
 axes[0, 0].set_ylabel('Total magnetization')
+axes[0, 0].errorbar(temps, magAvgs, yerr=magErrors, fmt='o')
 
-suss = []
-for temp, magAvg, magAvg2 in zip(temps, magAvgs, magAvgs2):
-    val = 1 / (2500 * temp) * (magAvg2 - magAvg**2)
-    suss.append(val)
-
-axes[0, 1].scatter(temps, suss, marker='o', color='RoyalBlue')
+axes[0, 1].scatter(temps, susses, marker='o', color='RoyalBlue')
 axes[0, 1].set_xlabel('Value of kT')
 axes[0, 1].set_ylabel('Value of susceptibility')
+axes[0, 1].errorbar(temps, susses, yerr=sussErrors, fmt='o')
 
 axes[1, 0].scatter(temps, energyAvgs, marker='o', color='IndianRed')
 axes[1, 0].set_xlabel('Value of kT')
 axes[1, 0].set_ylabel('Total energy')
+axes[1, 0].errorbar(temps, energyAvgs, yerr=energyErrors, fmt='o')
 
-heatCapacities = []
-for temp, eAvg, eAvg2 in zip(temps, energyAvgs, energyAvgs2):
-    val = 1 / (2500 * temp**2) * (eAvg2 - eAvg**2)
-    heatCapacities.append(val)
-
-axes[1, 1].scatter(temps, heatCapacities, marker='o', color='RoyalBlue')
+axes[1, 1].scatter(temps, heatCaps, marker='o', color='RoyalBlue')
 axes[1, 1].set_xlabel('Value of kT')
 axes[1, 1].set_ylabel('Heat capacity per spin')
+axes[1, 1].errorbar(temps, heatCaps, yerr=hCerrors, fmt='o')
 
 plt.tight_layout()
-plt.savefig('Task4_fig')
+plt.savefig('Task4_witherror_fig')
 plt.close()
