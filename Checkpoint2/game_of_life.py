@@ -104,8 +104,13 @@ class GameOfLife():
 
 def task2():
     times = []
+
+    f = open('equilibrate_times.dat', 'w')
     for i in range(500):
-        times.append(GameOfLife(50, 'random').run_until_equilibrium())
+        time = GameOfLife(50, 'random').run_until_equilibrium()
+        times.append(time)
+        f.write(f'{time}')
+    f.close()
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     ax.hist(times, bins=50)
@@ -139,7 +144,7 @@ def task3():
     plt.show()
     plt.close()
 
-# task3()
+task2()
 
 
 # GameOfLife(10).run_until_equilibrium()
@@ -152,9 +157,9 @@ def task3():
 # n=int(sys.argv[1])
 # mode=str(sys.argv[2])
 
-n = 50
-mode = 'random'
-nupdates = 100
+#n = 50
+#mode = 'random'
+#nupdates = 100
 
-gol = GameOfLife(n, mode)
-gol.animate(nupdates)
+#gol = GameOfLife(n, mode)
+#gol.animate(nupdates)
