@@ -53,17 +53,17 @@ class GameOfLife():
 
     def animate(self, nstep):
         fig = plt.figure(figsize=(8, 8))
-        fig.patch.set_facecolor('blue')
-        fig.patch.set_alpha(0.4)
+        #fig.patch.set_facecolor('blue')
+        #ig.patch.set_alpha(0.4)
         plt.tight_layout()
-        im=plt.imshow(self.states, animated=True, cmap='tab20c')
+        im=plt.imshow(self.states, animated=True)
 
         for n in range(nstep):
             self.update_lattice()
 
             plt.cla()
             plt.tight_layout()
-            im=plt.imshow(self.states, animated=True, cmap='tab20c')
+            im=plt.imshow(self.states, animated=True)
             plt.draw()
             plt.pause(0.01)
 
@@ -106,16 +106,16 @@ def task2():
     times = []
 
     f = open('equilibrate_times.dat', 'w')
-    for i in range(500):
+    for i in range(100):
         time = GameOfLife(50, 'random').run_until_equilibrium()
         times.append(time)
-        f.write(f'{time}')
+        f.write(f'{time}\n')
     f.close()
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 10))
     ax.hist(times, bins=50)
     ax.set_xlabel('Number of iterations')
-    ax.set_title('Time taken to reach equilibrium for 500 random initializations of Game of Life')
+    ax.set_title('Time taken to reach equilibrium for 100 random initializations of Game of Life')
     plt.savefig('task_2')
     plt.show()
     plt.close()
@@ -144,7 +144,7 @@ def task3():
     plt.show()
     plt.close()
 
-task2()
+#task2()
 
 
 # GameOfLife(10).run_until_equilibrium()
@@ -157,9 +157,9 @@ task2()
 # n=int(sys.argv[1])
 # mode=str(sys.argv[2])
 
-#n = 50
-#mode = 'random'
-#nupdates = 100
+n = 50
+mode = 'random'
+nupdates = 100
 
-#gol = GameOfLife(n, mode)
-#gol.animate(nupdates)
+gol = GameOfLife(n, mode)
+gol.animate(nupdates)

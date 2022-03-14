@@ -17,7 +17,7 @@ for i, prop in enumerate(imunProp):
         freeze.append(inf)
     avg = np.mean(freeze)
     err = np.std(freeze)
-    f.write(f'{prop} {avg} {err}')
+    f.write(f'{prop} {avg} {err}\n')
     plotData.append(avg)
     errors.append(err)
 f.close()

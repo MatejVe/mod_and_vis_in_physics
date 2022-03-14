@@ -8,23 +8,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib import colors
-from numba import jit
-
-#def nearest_neighbours(row, col, latticeLen):
-#    return [((row - 1) % latticeLen, col), 
-#            (row, (col - 1) % latticeLen), 
-#            (row, (col + 1) % latticeLen), 
-#            ((row + 1) % latticeLen, col)]
 
 def nearest_neighbours(row, col, latticeLen):
-    return [((row - 1) % latticeLen, (col - 1) % latticeLen), # One up, one left
-            ((row - 1) % latticeLen, col),                    # One up
-            ((row - 1) % latticeLen, (col + 1) % latticeLen), # One up, one right
-            (row, (col - 1) % latticeLen),                    # One left
-            (row, (col + 1) % latticeLen),                    # One right
-            ((row + 1) % latticeLen, (col - 1) % latticeLen), # One down, one left
-            ((row + 1) % latticeLen, col),                    # One down
-            ((row + 1) % latticeLen, (col + 1) % latticeLen)] # One down, one right
+    return [((row - 1) % latticeLen, col), 
+            (row, (col - 1) % latticeLen), 
+            (row, (col + 1) % latticeLen), 
+            ((row + 1) % latticeLen, col)]
+
+#def nearest_neighbours(row, col, latticeLen):
+#    return [((row - 1) % latticeLen, (col - 1) % latticeLen), # One up, one left
+#            ((row - 1) % latticeLen, col),                    # One up
+#            ((row - 1) % latticeLen, (col + 1) % latticeLen), # One up, one right
+#            (row, (col - 1) % latticeLen),                    # One left
+#            (row, (col + 1) % latticeLen),                    # One right
+#            ((row + 1) % latticeLen, (col - 1) % latticeLen), # One down, one left
+#            ((row + 1) % latticeLen, col),                    # One down
+#            ((row + 1) % latticeLen, (col + 1) % latticeLen)] # One down, one right
 
 class SIRS():
 
@@ -43,7 +42,7 @@ class SIRS():
                     row.append(np.random.choice([1, 2, 0]))
                 self.lattice.append(row)
         elif initState == 'outbreak':
-            self.lattice = np.ones((50, 50))
+            self.lattice = np.ones((N, N))
             self.lattice[[0,0,1,1,2,2,2,0,1], [0,1,0,1,0,1,2,2,2]] = 2
         else:
             self.lattice = initState
@@ -156,5 +155,8 @@ def dynamic_equilibrium_SIR():
     s.visualise(0.5, 0.5, 0.5)
 
 def cyclic_wave():
-    s = SIRS(50)
-    s.visualise(0.15, 0.5, 0.5)
+    s = SIRS(100, 0.8, 0.1, 0.01, initState='outbreak')
+    s.visualise(nstep=500)
+
+#s = SIRS(100, 0.8, 0.1, 0.01, initState='outbreak')
+#s.visualise(nstep=300)

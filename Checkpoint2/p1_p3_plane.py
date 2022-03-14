@@ -1,21 +1,22 @@
 from SIRS import *
+from numba import jit
 
 p1s = np.linspace(0, 1, 20)
 p3s = np.linspace(0, 1, 20)
 
 plotData = []
 
-#f = open('p1_p3_plane.dat', 'w')
-#for i, p1 in enumerate(p1s):
-#    row = []
-#    for j, p3 in enumerate(p3s):
-#        print(f'p1-{i}/20, p3-{j}/20')
-#        s = SIRS(50, p1, 0.5, p3)
-#        infection = s.infectiveness_measure(1100, 100)
-#        f.write(f'{p1} {p3} {infection}\n')
-#        row.append(infection)
-#    plotData.append(row)
-#f.close()
+f = open('p1_p3_plane.dat', 'w')
+for i, p1 in enumerate(p1s):
+    row = []
+    for j, p3 in enumerate(p3s):
+        print(f'p1-{i}/20, p3-{j}/20')
+        s = SIRS(50, p1, 0.5, p3)
+        infection = s.infectiveness_measure(1100, 100)
+        f.write(f'{p1} {p3} {infection}\n')
+        row.append(infection)
+    plotData.append(row)
+f.close()
 
 f = open('p1_p3_plane.dat')
 data = f.readlines()
