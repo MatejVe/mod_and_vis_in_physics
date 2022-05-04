@@ -69,7 +69,7 @@ def plot_fe(lat, dx, dt, nstep, filename):
     plt.savefig('Checkpoint3/' + filename)
     plt.close()
 
-lattice = init_const_noise(100, 0)
+lattice = init_const_noise(100, 0.5)
 #plot_fe(lattice, dx=1, dt=2, nstep=1000000, filename='buble_fe')
 
 animate(lattice, dx=1, dt=2, nstep=100000)

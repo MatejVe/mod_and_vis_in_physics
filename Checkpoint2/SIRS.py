@@ -158,5 +158,5 @@ def cyclic_wave():
     s = SIRS(100, 0.8, 0.1, 0.01, initState='outbreak')
     s.visualise(nstep=500)
 
-#s = SIRS(100, 0.8, 0.1, 0.01, initState='outbreak')
-#s.visualise(nstep=300)
+s = SIRS(100, 0.8, 0.1, 0.01, initState='outbreak')
+s.visualise(nstep=300)
